@@ -99,10 +99,12 @@ uint64_t Reader::readUint64()
 
 std::string Reader::readString(uint32_t length)
 {
-    char buffer[length + 1];
+	char* buffer = new char[length + 1]; // memory leak
     buffer[length] = 0;
     if(length) read(buffer, length);
-    return std::string(buffer);
+	std::string rValue = std::string(buffer);
+	delete[]buffer;
+    return rValue;
 }
 
 float Reader::readFloat()

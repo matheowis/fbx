@@ -20,6 +20,7 @@ public:
 
     std::uint32_t getVersion();
     void print();
+	void printGeometry();
 
 private:
     std::uint32_t version;

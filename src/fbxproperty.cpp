@@ -90,6 +90,7 @@ FBXProperty::FBXProperty(std::ifstream &input)
         uint32_t arrayLength = reader.readUint32(); // number of elements in array
         uint32_t encoding = reader.readUint32(); // 0 .. uncompressed, 1 .. zlib-compressed
         uint32_t compressedLength = reader.readUint32();
+
         if(encoding) {
             uint64_t uncompressedLength = arrayElementSize(type - ('a'-'A')) * arrayLength;
 
@@ -97,12 +98,16 @@ FBXProperty::FBXProperty(std::ifstream &input)
             if(decompressedBuffer == NULL) throw std::string("Malloc failed");
             BufferAutoFree baf(decompressedBuffer);
 
-            uint8_t compressedBuffer[compressedLength];
-            reader.read((char*)compressedBuffer, compressedLength);
+			uint8_t* compressedBuffer = new uint8_t[compressedLength];
 
-            uint64_t destLen = uncompressedLength;
-            uint64_t srcLen = compressedLength;
+            reader.read((char*)compressedBuffer, compressedLength);
+			
+			uLongf destLen = uncompressedLength;
+			uLong srcLen = compressedLength;
+
             uncompress2(decompressedBuffer, &destLen, compressedBuffer, &srcLen);
+
+			delete[]compressedBuffer;
 
             if(srcLen != compressedLength) throw std::string("compressedLength does not match data");
             if(destLen != uncompressedLength) throw std::string("uncompressedLength does not match data");
@@ -128,7 +133,8 @@ void FBXProperty::write(std::ofstream &output)
     if(type == 'Y') {
         writer.write(value.i16);
     } else if(type == 'C') {
-        writer.write((uint8_t)(value.boolean ? 1 : 0));
+        //writer.write((uint8_t)(value.boolean ? 1 : 0));
+		writer.write((uint8_t)(value.boolean ? 0x54 : 0x46));
     } else if(type == 'I') {
         writer.write(value.i32);
     } else if(type == 'F') {

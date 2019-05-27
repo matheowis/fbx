@@ -14,6 +14,8 @@ public:
     std::uint32_t read(std::ifstream &input, uint32_t start_offset);
     std::uint32_t write(std::ofstream &output, uint32_t start_offset);
     void print(std::string prefix="");
+	void printGeometry(std::string prefix = "");
+
     bool isNull();
 
     void addProperty(int16_t);
